@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cửa hàng sản phẩm</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+  <div class="container py-5">
+    <h1 class="text-center mb-5">🛍️ Cửa hàng điện thoại</h1>
+
+    <!-- Tìm kiếm và lọc -->
+    <div class="row mb-4">
+      <div class="col-md-4">
+        <input type="text" id="searchProduct" class="form-control" placeholder="🔍 Tìm sản phẩm..." />
+      </div>
+      <div class="col-md-4">
+        <select id="productTypeFilter" class="form-select">
+          <option value="all">Tất cả</option>
+          <option value="iphone">iPhone</option>
+          <option value="samsung">Samsung</option>
+          <option value="xiaomi">Xiaomi</option>
+          <option value="vivo">Vivo</option>
+        </select>
+      </div>
+      <div class="col-md-4">
+        <select id="sortSelect" class="form-select">
+          <option value="">-- Sắp xếp --</option>
+          <option value="priceAsc">Giá tăng dần</option>
+          <option value="priceDesc">Giá giảm dần</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Danh sách sản phẩm -->
+    <div id="productList" class="row"></div>
+
+    <!-- Phân trang -->
+    <div id="pagination" class="text-center mt-4"></div>
+
+    <!-- Giỏ hàng -->
+    <div class="mt-5 border-top pt-4">
+      <h3>🛒 Giỏ hàng</h3>
+      <div id="cartItems" class="mb-3"></div>
+      <div id="cartTotal" class="fw-bold mb-3">Tổng: 0 $</div>
+      <button onclick="checkout()" class="btn btn-success">Thanh toán</button>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Product model (nếu có) -->
+  <script src="./js/models/product.js"></script>
+  <!-- Main logic -->
+  <script src="./js/main.js"></script>
+</body>
+</html>
