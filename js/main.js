@@ -1,4 +1,3 @@
-// main.js - dành cho index.html
 const API_URL = "https://6808e8cc942707d722e05af6.mockapi.io/products";
 const productListEl = document.getElementById("productList");
 const searchEl = document.getElementById("searchProduct");
@@ -85,10 +84,39 @@ function changePage(page) {
 function addToCart(productId) {
   const product = allProducts.find(p => p.id === productId);
   if (product) {
-    cart.push(product);
+    const existingProduct = cart.find(item => item.id === productId);
+    if (existingProduct) {
+      // Nếu sản phẩm đã có trong giỏ, tăng số lượng
+      existingProduct.quantity += 1;
+    } else {
+      // Nếu sản phẩm chưa có, thêm mới vào giỏ với số lượng 1
+      cart.push({...product, quantity: 1});
+    }
     localStorage.setItem("cart", JSON.stringify(cart));
     updateCartUI();
     alert("Đã thêm vào giỏ hàng!");
+  }
+}
+
+function removeFromCart(index) {
+  cart.splice(index, 1);
+  localStorage.setItem("cart", JSON.stringify(cart));
+  updateCartUI();
+}
+
+function increaseQuantity(index) {
+  cart[index].quantity += 1;
+  localStorage.setItem("cart", JSON.stringify(cart));
+  updateCartUI();
+}
+
+function decreaseQuantity(index) {
+  if (cart[index].quantity > 1) {
+    cart[index].quantity -= 1;
+    localStorage.setItem("cart", JSON.stringify(cart));
+    updateCartUI();
+  } else {
+    alert("Không thể giảm số lượng dưới 1.");
   }
 }
 
@@ -104,23 +132,24 @@ function updateCartUI() {
 
   let total = 0;
   cart.forEach((item, index) => {
-    total += item.price;
+    total += item.price * item.quantity;
     const itemDiv = document.createElement("div");
     itemDiv.className = "border-bottom py-2 d-flex justify-content-between align-items-center";
     itemDiv.innerHTML = `
-      <div>${item.name} - <span class="text-danger">${item.price} $</span></div>
-      <button onclick="removeFromCart(${index})" class="btn btn-sm btn-danger">Xóa</button>
+      <div>
+        ${item.name} - <span class="text-danger">${item.price} $</span> 
+        x ${item.quantity}
+      </div>
+      <div>
+        <button onclick="decreaseQuantity(${index})" class="btn btn-sm btn-warning">-</button>
+        <button onclick="increaseQuantity(${index})" class="btn btn-sm btn-success">+</button>
+        <button onclick="removeFromCart(${index})" class="btn btn-sm btn-danger">Xóa</button>
+      </div>
     `;
     cartItemsDiv.appendChild(itemDiv);
   });
 
   document.getElementById("cartTotal").innerText = `Tổng: ${total} $`;
-}
-
-function removeFromCart(index) {
-  cart.splice(index, 1);
-  localStorage.setItem("cart", JSON.stringify(cart));
-  updateCartUI();
 }
 
 function showCart() {
@@ -143,13 +172,11 @@ function checkout() {
   updateCartUI();
 }
 
-// Lọc, tìm kiếm, sắp xếp
 function filterAndRenderProducts() {
   const keyword = searchEl?.value.toLowerCase() || "";
   const type = filterEl?.value || "all";
   let filtered = allProducts;
 
-  // Tìm kiếm theo từ khóa
   if (keyword) {
     filtered = filtered.filter(p =>
       p.name.toLowerCase().includes(keyword) ||
@@ -157,12 +184,10 @@ function filterAndRenderProducts() {
     );
   }
 
-  // Lọc theo loại sản phẩm
   if (type !== "all") {
     filtered = filtered.filter(p => p.type === type);
   }
 
-  // Sắp xếp nếu có
   const sortValue = sortSelect?.value;
   switch (sortValue) {
     case "priceAsc":
@@ -181,7 +206,6 @@ searchEl?.addEventListener("input", filterAndRenderProducts);
 filterEl?.addEventListener("change", filterAndRenderProducts);
 sortSelect?.addEventListener("change", filterAndRenderProducts);
 
-// Khi load trang
 document.addEventListener("DOMContentLoaded", () => {
   const storedCart = localStorage.getItem("cart");
   if (storedCart) {
