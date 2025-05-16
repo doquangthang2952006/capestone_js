@@ -1,15 +1,19 @@
 const API_URL = "https://6808e8cc942707d722e05af6.mockapi.io/products";
 const form = document.getElementById("productForm");
 const tableBody = document.querySelector("#productTable tbody");
+const searchInput = document.getElementById("searchInput");
+const sortSelect = document.getElementById("sortSelect");
+
 let isEditing = false;
 let editId = null;
+let allProducts = [];
 
 form.addEventListener("submit", async function (e) {
   e.preventDefault();
 
   const newProduct = {
     name: document.getElementById("productName").value,
-    price: +document.getElementById("productPrice").value,
+    price: parseFloat(document.getElementById("productPrice").value),
     desc: document.getElementById("productDesc").value,
     img: document.getElementById("productImage").value,
     type: document.getElementById("productType").value,
@@ -17,6 +21,8 @@ form.addEventListener("submit", async function (e) {
     backCamera: document.getElementById("productBackCamera").value,
     frontCamera: document.getElementById("productFrontCamera").value,
   };
+
+  if (!validateForm(newProduct)) return;
 
   if (isEditing) {
     await fetch(`${API_URL}/${editId}`, {
@@ -38,9 +44,28 @@ form.addEventListener("submit", async function (e) {
   loadProducts();
 });
 
+function validateForm(product) {
+  if (
+    !product.name ||
+    !product.price ||
+    !product.img ||
+    !product.desc ||
+    !product.type
+  ) {
+    alert("Vui lòng điền đầy đủ thông tin.");
+    return false;
+  }
+  if (isNaN(product.price) || product.price <= 0) {
+    alert("Giá phải là một số dương.");
+    return false;
+  }
+  return true;
+}
+
 async function loadProducts() {
   const res = await fetch(API_URL);
   const data = await res.json();
+  allProducts = data;
   renderAdminTable(data);
 }
 
@@ -65,7 +90,9 @@ window.editProduct = async function (id) {
   const res = await fetch(`${API_URL}/${id}`);
   const data = await res.json();
   for (let key in data) {
-    const input = document.getElementById("product" + capitalizeFirstLetter(key));
+    const input = document.getElementById(
+      "product" + capitalizeFirstLetter(key)
+    );
     if (input) input.value = data[key];
   }
   isEditing = true;
@@ -82,5 +109,26 @@ window.deleteProduct = async function (id) {
 function capitalizeFirstLetter(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
+
+// Tìm kiếm
+searchInput.addEventListener("input", function () {
+  const keyword = searchInput.value.trim().toLowerCase();
+  const result = allProducts.filter((p) =>
+    p.name.toLowerCase().includes(keyword)
+  );
+  renderAdminTable(result);
+});
+
+// Sắp xếp
+sortSelect.addEventListener("change", function () {
+  const option = sortSelect.value;
+  let sorted = [...allProducts];
+  if (option === "asc") {
+    sorted.sort((a, b) => a.price - b.price);
+  } else if (option === "desc") {
+    sorted.sort((a, b) => b.price - a.price);
+  }
+  renderAdminTable(sorted);
+});
 
 document.addEventListener("DOMContentLoaded", loadProducts);
